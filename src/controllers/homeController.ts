@@ -14,11 +14,13 @@ export const me = async (req: Request, res: Response) => {
 
 export const home = async (req: Request, res: Response) => {
   try {
-    const topTracks = (await spotifyApi.getMyTopTracks()).body.items;
-    let topTracksParsed: String[] = [];
+    const topTracksParsed: String[] = [];
+    const topTracks = (await spotifyApi.getPlaylist('6oAWxWKLn3FxvjfKKU1cs8'))
+      .body.tracks.items;
+
     await Promise.all(
       topTracks.map(async track => {
-        let t = new track2Emoji(track.name, track.artists[0].name);
+        let t = new track2Emoji(track.track.name, track.track.artists[0].name);
         topTracksParsed.push(await t.returnEmoji());
       })
     );
