@@ -3,7 +3,7 @@ import { createToken } from '../config/auth';
 import { spotifyApi, scopes } from '../modules/spotifyClient';
 
 export const login = (req: Request, res: Response) => {
-  const loginUrl = spotifyApi.createAuthorizeURL(scopes, '', true);
+  const loginUrl = spotifyApi.createAuthorizeURL(scopes, '');
   res.redirect(loginUrl);
 };
 
