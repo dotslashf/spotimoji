@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
+const MongoStore = require('connect-mongo')(session);
 
 require('dotenv').config();
 
@@ -15,8 +16,11 @@ app.use(
   session({
     secret: process.env.TOKEN_SECRET!,
     cookie: { secure: false, maxAge: 3600000 },
-    resave: false,
-    saveUninitialized: false,
+    resave: true,
+    saveUninitialized: true,
+    store: new MongoStore({
+      url: `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_CLUSTER}-kdbqm.mongodb.net/${process.env.DB_NAME}`,
+    }),
   })
 );
 app.use(morgan('tiny'));

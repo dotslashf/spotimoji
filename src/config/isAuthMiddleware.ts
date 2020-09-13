@@ -13,7 +13,6 @@ export const isAuth = (req: Request, res: Response, next: NextFunction) => {
     req.session!.token,
     process.env.TOKEN_SECRET!
   ) as TokenContext;
-  console.log(token);
   spotifyApi.setAccessToken(token.accessToken);
   spotifyApi.setRefreshToken(token.refreshToken);
   next();
