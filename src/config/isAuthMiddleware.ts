@@ -9,11 +9,16 @@ export const isAuth = (req: Request, res: Response, next: NextFunction) => {
     return res.redirect('/auth/login');
   }
 
-  const token = verify(
-    req.session!.token,
-    process.env.TOKEN_SECRET!
-  ) as TokenContext;
-  spotifyApi.setAccessToken(token.accessToken);
-  spotifyApi.setRefreshToken(token.refreshToken);
-  next();
+  try {
+    const token = verify(
+      req.session!.token,
+      process.env.TOKEN_SECRET!
+    ) as TokenContext;
+    spotifyApi.setAccessToken(token.accessToken);
+    spotifyApi.setRefreshToken(token.refreshToken);
+    next();
+  } catch (err) {
+    console.log(err);
+    res.redirect('/auth/login');
+  }
 };
