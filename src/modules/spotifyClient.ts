@@ -13,8 +13,24 @@ export const getMe = async () => {
   return await spotifyApi.getMe();
 };
 
-export const getSpotifyPlaylist = async (spotifyUri: string) => {
-  return (await spotifyApi.getPlaylist(spotifyUri)).body.tracks.items;
+export const getPlaylistTracks = async (
+  spotifyUri: string,
+  limit: number,
+  page: number
+) => {
+  const offset = (page - 1) * limit;
+  const playlists = await spotifyApi.getPlaylistTracks(spotifyUri, {
+    limit,
+    offset,
+  });
+
+  return playlists.body.items
+};
+
+export const getPlaylistTracksCount = async (
+  spotifyUri: string
+): Promise<Number> => {
+  return (await spotifyApi.getPlaylistTracks(spotifyUri)).body.total;
 };
 
 export const getTopTracks = async () => {

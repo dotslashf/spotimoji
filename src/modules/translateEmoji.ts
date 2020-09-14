@@ -19,7 +19,7 @@ export class track2Emoji {
     this.trackArtist = artist.split(' ');
   }
 
-  translateToEn(word: String) {
+  translateToEn(word: String): String {
     return translation(word, { to: 'en' });
   }
 
@@ -31,7 +31,7 @@ export class track2Emoji {
     }
   }
 
-  async returnEmoji(): Promise<String> {
+  async returnEmoji(): Promise<Object> {
     const originalTitle: String = this.trackTitle.join(' ');
     const originalArtists: String = this.trackArtist.join(' ');
 
@@ -63,8 +63,9 @@ export class track2Emoji {
       })
     );
 
-    return `${this.trackTitle.join(' ')} - ${this.trackArtist.join(
-      ' '
-    )} | ${originalTitle} - ${originalArtists}`;
+    return {
+      emojified: `${this.trackTitle.join(' ')} - ${this.trackArtist.join(' ')}`,
+      original: `${originalTitle} - ${originalArtists}`,
+    };
   }
 }

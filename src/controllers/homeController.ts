@@ -1,8 +1,9 @@
 import {
-  getSpotifyPlaylist,
+  getPlaylistTracks,
   getMe,
   getTopTracks,
   listPlaylists,
+  getPlaylistTracksCount,
 } from './../modules/spotifyClient';
 import { Response, Request } from 'express';
 import { track2Emoji } from '../modules/translateEmoji';
@@ -29,7 +30,7 @@ export const home = async (req: Request, res: Response) => {
 
 export const topTracks = async (req: Request, res: Response) => {
   try {
-    const topTracksParsed: String[] = [];
+    const topTracksParsed: Object[] = [];
 
     const topTracks = await getTopTracks();
 
@@ -48,17 +49,51 @@ export const topTracks = async (req: Request, res: Response) => {
 
 export const getPlaylists = async (req: Request, res: Response) => {
   try {
-    const playlistTracksParsed: String[] = [];
+    const playlistTracksParsed: Object[] = [];
+    const tracksCount = await getPlaylistTracksCount(req.params.id!);
+    if (tracksCount > Number(req.query.limit)) {
+      const tracks = await getPlaylistTracks(
+        req.params.id!,
+        Number(req.query.limit),
+        Number(req.query.page)
+      );
 
-    const playlistTracks = await getSpotifyPlaylist(req.params.id!);
+      await Promise.all(
+        tracks.map(async track => {
+          let t = new track2Emoji(
+            track.track.name,
+            track.track.artists[0].name
+          );
+          playlistTracksParsed.push(await t.returnEmoji());
+        })
+      );
 
-    await Promise.all(
-      playlistTracks.map(async track => {
-        let t = new track2Emoji(track.track.name, track.track.artists[0].name);
-        playlistTracksParsed.push(await t.returnEmoji());
-      })
-    );
-    res.status(200).send(playlistTracksParsed);
+      res.status(200).send({
+        data: playlistTracksParsed,
+        count: playlistTracksParsed.length,
+      });
+    } else {
+      const tracks = await getPlaylistTracks(
+        req.params.id!,
+        Number(req.query.limit),
+        1
+      );
+
+      await Promise.all(
+        tracks.map(async track => {
+          let t = new track2Emoji(
+            track.track.name,
+            track.track.artists[0].name
+          );
+          playlistTracksParsed.push(await t.returnEmoji());
+        })
+      );
+
+      res.status(200).send({
+        data: playlistTracksParsed,
+        count: playlistTracksParsed.length,
+      });
+    }
   } catch (err) {
     console.log('Err home', err);
     res.status(400).send(err);
