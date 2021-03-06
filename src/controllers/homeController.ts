@@ -50,50 +50,47 @@ export const topTracks = async (req: Request, res: Response) => {
 export const getPlaylists = async (req: Request, res: Response) => {
   try {
     const playlistTracksParsed: Object[] = [];
-    const tracksCount = await getPlaylistTracksCount(req.params.id!);
-    if (tracksCount > Number(req.query.limit)) {
-      const tracks = await getPlaylistTracks(
-        req.params.id!,
-        Number(req.query.limit),
-        Number(req.query.page)
-      );
+    const tracksCount = (await getPlaylistTracksCount(
+      req.params.id!
+    )) as number;
+    let limit = 0;
+    let total_page = 0;
+    let page = 0;
 
-      await Promise.all(
-        tracks.map(async track => {
-          let t = new track2Emoji(
-            track.track.name,
-            track.track.artists[0].name
-          );
-          playlistTracksParsed.push(await t.returnEmoji());
-        })
-      );
-
-      res.status(200).send({
-        data: playlistTracksParsed,
-        count: playlistTracksParsed.length,
-      });
+    if (req.query.limit) {
+      limit = parseInt(req.query.limit as string);
+      total_page =
+        Math.floor(tracksCount / limit) + (tracksCount % limit > 0 ? 1 : 0);
     } else {
-      const tracks = await getPlaylistTracks(
-        req.params.id!,
-        Number(req.query.limit),
-        1
-      );
-
-      await Promise.all(
-        tracks.map(async track => {
-          let t = new track2Emoji(
-            track.track.name,
-            track.track.artists[0].name
-          );
-          playlistTracksParsed.push(await t.returnEmoji());
-        })
-      );
-
-      res.status(200).send({
-        data: playlistTracksParsed,
-        count: playlistTracksParsed.length,
-      });
+      limit = Number(tracksCount);
     }
+
+    if (req.query.page && parseInt(req.query.page as string) <= total_page) {
+      page = Number(req.query.page);
+    } else if (
+      req.query.page &&
+      parseInt(req.query.page as string) > total_page
+    ) {
+      page = total_page;
+    }
+
+    const tracks = await getPlaylistTracks(req.params.id!, limit, page);
+
+    await Promise.all(
+      tracks.map(async track => {
+        let t = new track2Emoji(track.track.name, track.track.artists[0].name);
+        playlistTracksParsed.push(await t.returnEmoji());
+      })
+    );
+
+    res.status(200).send({
+      data: playlistTracksParsed,
+      pagination: {
+        count: playlistTracksParsed.length,
+        page: `${page} / ${total_page}`,
+        limit: limit,
+      },
+    });
   } catch (err) {
     console.log('Err home', err);
     res.status(400).send(err);
