@@ -3,8 +3,15 @@ import { createToken } from '../config/auth';
 import { spotifyApi, scopes } from '../modules/spotifyClient';
 
 export const login = (req: Request, res: Response) => {
-  const loginUrl = spotifyApi.createAuthorizeURL(scopes, '');
-  res.redirect(loginUrl);
+  const loginUrl = spotifyApi.createAuthorizeURL(scopes, '', true);
+  return res.redirect(loginUrl);
+};
+
+export const logout = (req: Request, res: Response) => {
+  req.session?.destroy(() => {
+    console.log('Logout success');
+    return res.status(200).send('Logout Success!');
+  });
 };
 
 export const callback = async (req: Request, res: Response) => {

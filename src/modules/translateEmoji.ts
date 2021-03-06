@@ -38,7 +38,7 @@ export class track2Emoji {
     await Promise.all(
       this.trackTitle.map(async (word, i) => {
         if (!this.isWordinEn(word)) {
-          const newWord = await this.translateToEn(word);
+          const newWord = this.translateToEn(word);
           const emoji = translateEmoji.getEmojiForWord(newWord);
 
           if (!emoji) {
@@ -52,7 +52,7 @@ export class track2Emoji {
 
     await Promise.all(
       this.trackArtist.map(async (word, i) => {
-        const newWord = await this.translateToEn(word);
+        const newWord = this.translateToEn(word);
         const emoji = translateEmoji.getEmojiForWord(newWord);
 
         if (!emoji) {

@@ -4,9 +4,18 @@ import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
-const MongoStore = require('connect-mongo')(session);
-
+import firebase from 'firebase-admin';
+import serviceAccountCredentials from './config/serviceAccountCredentials.json';
 require('dotenv').config();
+
+const serviceAccount = serviceAccountCredentials as firebase.ServiceAccount;
+
+const FirebaseStore = require('connect-session-firebase')(session);
+
+const ref = firebase.initializeApp({
+  credential: firebase.credential.cert(serviceAccount),
+  databaseURL: process.env.FIREBASE_DB_URL,
+});
 
 const app: express.Application = express();
 
@@ -18,12 +27,15 @@ app.use(
     cookie: { secure: false, maxAge: 3600000 },
     resave: true,
     saveUninitialized: true,
-    store: new MongoStore({
-      url: `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_CLUSTER}-kdbqm.mongodb.net/${process.env.DB_NAME}`,
+    store: new FirebaseStore({
+      database: ref.database(),
     }),
   })
 );
 app.use(morgan('tiny'));
+app.get('/', (req, res) => {
+  res.redirect('/home');
+});
 app.use('/auth', routes.authRouter);
 app.use('/home', routes.homeRouter);
 
