@@ -1,3 +1,4 @@
+import { pagination } from './../utils/pagination';
 import {
   getPlaylistTracks,
   getMe,
@@ -53,28 +54,20 @@ export const getPlaylists = async (req: Request, res: Response) => {
     const tracksCount = (await getPlaylistTracksCount(
       req.params.id!
     )) as number;
-    let limit = 0;
-    let total_page = 0;
-    let page = 0;
+    let limit = req.query.limit ? (req.query.limit as string) : 10;
+    let page = req.query.page ? (req.query.page as string) : 1;
 
-    if (req.query.limit) {
-      limit = parseInt(req.query.limit as string);
-      total_page =
-        Math.floor(tracksCount / limit) + (tracksCount % limit > 0 ? 1 : 0);
-    } else {
-      limit = Number(tracksCount);
-    }
+    let { currentPage, totalPage } = pagination(
+      tracksCount,
+      Number(limit),
+      Number(page)
+    );
 
-    if (req.query.page && parseInt(req.query.page as string) <= total_page) {
-      page = Number(req.query.page);
-    } else if (
-      req.query.page &&
-      parseInt(req.query.page as string) > total_page
-    ) {
-      page = total_page;
-    }
-
-    const tracks = await getPlaylistTracks(req.params.id!, limit, page);
+    const tracks = await getPlaylistTracks(
+      req.params.id!,
+      Number(limit),
+      currentPage
+    );
 
     await Promise.all(
       tracks.map(async track => {
@@ -87,8 +80,8 @@ export const getPlaylists = async (req: Request, res: Response) => {
       data: playlistTracksParsed,
       pagination: {
         count: playlistTracksParsed.length,
-        page: `${page} / ${total_page}`,
-        limit: limit,
+        page: `${currentPage} / ${totalPage}`,
+        limit,
       },
     });
   } catch (err) {
