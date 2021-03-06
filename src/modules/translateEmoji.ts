@@ -1,14 +1,9 @@
-const translateEmoji = require('moji-translate');
-const translation = require('translate');
-const checkWord = require('check-word');
-
-const words = checkWord('en');
-
 require('dotenv').config();
+const translateEmoji = require('moji-translate');
+// const projectId = process.env.GOOGLE_PROJECT_ID;
+// const { Translate } = require('@google-cloud/translate').v2;
 
-translation.engine = 'google';
-translation.key = process.env.TRANSLATE_KEY;
-translation.from = 'id';
+// const translate = new Translate({ projectId });
 
 export class track2Emoji {
   trackTitle: String[];
@@ -19,41 +14,27 @@ export class track2Emoji {
     this.trackArtist = artist.split(' ');
   }
 
-  translateToEn(word: String): String {
-    return translation(word, { to: 'en' });
-  }
-
-  isWordinEn(word: String): Boolean {
-    if (words.check(word.toLowerCase)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   async returnEmoji(): Promise<Object> {
     const originalTitle: String = this.trackTitle.join(' ');
     const originalArtists: String = this.trackArtist.join(' ');
 
     await Promise.all(
       this.trackTitle.map(async (word, i) => {
-        if (!this.isWordinEn(word)) {
-          const newWord = this.translateToEn(word);
-          const emoji = translateEmoji.getEmojiForWord(newWord);
+        // const [newWord] = await translate.translate(word, 'en');
+        const emoji = translateEmoji.getEmojiForWord(word);
 
-          if (!emoji) {
-            this.trackTitle[i] = word;
-          } else {
-            this.trackTitle[i] = emoji;
-          }
+        if (!emoji) {
+          this.trackTitle[i] = word;
+        } else {
+          this.trackTitle[i] = emoji;
         }
       })
     );
 
     await Promise.all(
       this.trackArtist.map(async (word, i) => {
-        const newWord = this.translateToEn(word);
-        const emoji = translateEmoji.getEmojiForWord(newWord);
+        // const [newWord] = await translate.translate(word, 'en');
+        const emoji = translateEmoji.getEmojiForWord(word);
 
         if (!emoji) {
           this.trackArtist[i] = word;

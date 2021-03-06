@@ -32,7 +32,7 @@ export const topTracks = async (req: Request, res: Response) => {
   try {
     const topTracksParsed: Object[] = [];
 
-    const topTracks = await getTopTracks();
+    let topTracks = await getTopTracks();
 
     await Promise.all(
       topTracks.map(async track => {

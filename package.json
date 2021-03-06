@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@google-cloud/translate": "^6.1.0",
     "body-parser": "^1.19.0",
     "check-word": "^1.1.0",
     "client-sessions": "^0.8.0",
@@ -23,7 +24,8 @@
   },
   "scripts": {
     "start": "node dist/src/app.js",
-    "dev": "nodemon src/app.ts",
+    "dev": "nodemon dist/app.js",
+    "watch": "tsc -w",
     "build": "tsc -p ."
   },
   "devDependencies": {
